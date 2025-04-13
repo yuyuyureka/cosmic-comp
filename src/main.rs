@@ -2,13 +2,14 @@ use cosmic::iced::{Color, Rectangle, Size};
 use cosmic::widget;
 use cosmic::widget::canvas;
 use cosmic_comp::hooks::{Decorations, Hooks};
-use cosmic_comp::shell::element::stack::DefaultDecorations as DefaultStackDecorations;
-use cosmic_comp::shell::element::window::DefaultDecorations as DefaultWindowDecorations;
+use cosmic_comp::shell::element::window::{SSD_HEIGHT, DefaultDecorations as DefaultWindowDecorations};
+use cosmic_comp::shell::element::stack::{TAB_HEIGHT, DefaultDecorations as DefaultStackDecorations};
 use std::sync::Arc;
 
 #[derive(Debug)]
 struct AddIndicator<Lower> {
     lower: Lower,
+    height: i32,
 }
 
 struct Circle {
@@ -50,20 +51,16 @@ impl<Message, Theme, Renderer: cosmic::iced_renderer::geometry::Renderer>
 impl<Internal, Message: std::clone::Clone + 'static, Lower: Decorations<Internal, Message>>
     Decorations<Internal, Message> for AddIndicator<Lower>
 {
-    fn height(&self, window: &Internal) -> i32 {
-        self.lower.height(window)
-    }
     fn view(&self, window: &Internal) -> cosmic::Element<'_, Message> {
         let orig = self.lower.view(window);
-        let height = self.lower.height(window);
         widget::row()
             .push(
                 widget::column()
                     .push(canvas(Circle {
-                        radius: (height as f32 / 2.) * 0.8,
+                        radius: (self.height as f32 / 2.) * 0.8,
                         color: Color::new(1.0, 0.0, 0.0, 1.0),
                     }))
-                    .width(height as f32),
+                    .width(self.height as f32),
             )
             .push(orig)
             .into()
@@ -73,9 +70,11 @@ impl<Internal, Message: std::clone::Clone + 'static, Lower: Decorations<Internal
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     cosmic_comp::run(Hooks {
         window_decorations: Some(Arc::new(AddIndicator {
+            height: SSD_HEIGHT,
             lower: DefaultWindowDecorations,
         })),
         stack_decorations: Some(Arc::new(AddIndicator {
+            height: TAB_HEIGHT,
             lower: DefaultStackDecorations,
         })),
     })
